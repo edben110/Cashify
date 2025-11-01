@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-retro-black text-neon-green;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+@layer components {
+  .retro-container {
+    @apply bg-retro-dark border-2 border-neon-green rounded-lg p-6 shadow-neon;
+  }
+
+  .retro-input {
+    @apply bg-retro-black border-2 border-neon-green rounded px-4 py-2 text-neon-green placeholder-neon-green/50 focus:outline-none focus:shadow-neon transition-all;
+  }
+
+  .retro-button {
+    @apply bg-retro-black border-2 border-neon-green text-neon-green px-6 py-2 rounded font-bold hover:bg-neon-green hover:text-retro-black transition-all duration-300 shadow-neon-sm hover:shadow-neon uppercase tracking-wider;
+  }
+
+  .retro-button-small {
+    @apply bg-retro-dark border-2 border-neon-green text-neon-green p-2 rounded font-bold hover:bg-neon-green hover:text-retro-black transition-all duration-300 shadow-neon-sm hover:shadow-neon;
+  }
+
+  .retro-button-danger {
+    @apply bg-retro-black border-2 border-red-500 text-red-500 px-4 py-2 rounded font-bold hover:bg-red-500 hover:text-retro-black transition-all duration-300 uppercase tracking-wider;
+  }
+
+  .retro-card {
+    @apply bg-retro-dark border-2 border-neon-green rounded-lg p-4 shadow-neon-sm hover:shadow-neon transition-all duration-300;
+  }
+
+  .retro-title {
+    @apply text-3xl md:text-5xl font-bold text-neon-green animate-pulse-neon uppercase tracking-widest;
+  }
+
+  .retro-subtitle {
+    @apply text-xl md:text-2xl font-bold text-neon-green uppercase tracking-wide;
+  }
+
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(57, 255, 20, 0.05) 50%,
+      transparent 100%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    animation: scan 8s linear infinite;
+  }
+
+  @keyframes scan {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+
+  .crt-effect {
+    text-shadow: 
+      0 0 1px rgba(57, 255, 20, 0.8),
+      0 0 2px rgba(57, 255, 20, 0.8),
+      0 0 5px rgba(57, 255, 20, 0.6);
+  }
+
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch::before {
+    animation: glitch-1 2s infinite;
+    color: #ff00de;
+    z-index: -1;
+  }
+
+  .glitch::after {
+    animation: glitch-2 2s infinite;
+    color: #00ffff;
+    z-index: -2;
+  }
+
+  @keyframes glitch-1 {
+    0%, 100% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      transform: translate(2px, 2px);
+    }
+    80% {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  @keyframes glitch-2 {
+    0%, 100% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(2px, -2px);
+    }
+    40% {
+      transform: translate(2px, 2px);
+    }
+    60% {
+      transform: translate(-2px, -2px);
+    }
+    80% {
+      transform: translate(-2px, 2px);
+    }
+  }
+}
