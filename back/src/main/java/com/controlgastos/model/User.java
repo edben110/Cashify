@@ -35,8 +35,8 @@ public class User {
     @Indexed(unique = true)
     private String correo;
     
-    @NotBlank(message = "La contrasenia es obligatoria")
-    @Size(min = 6, message = "La contrasenia debe tener al menos 6 caracteres")
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String contrasenia;
     
     // Listas de IDs referenciadas (no embebidas para mejor escalabilidad)
