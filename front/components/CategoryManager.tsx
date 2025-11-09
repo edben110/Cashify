@@ -112,9 +112,6 @@ export default function CategoryManager({ userId, categorias, onCategoryChange }
                     📁 {cat.nombre}
                   </h4>
                 </div>
-                <div className="text-xs text-neon-green/40 mb-3">
-                  ID: {cat.id.slice(0, 8)}...
-                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(cat)}

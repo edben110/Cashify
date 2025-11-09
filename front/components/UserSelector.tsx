@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { userService, UserResponse, UserRequest } from '@/lib/api';
 
 interface UserSelectorProps {
@@ -8,176 +8,187 @@ interface UserSelectorProps {
 }
 
 export default function UserSelector({ onUserSelect }: UserSelectorProps) {
-  const [users, setUsers] = useState<UserResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState<UserRequest>({
     apodo: '',
     correo: '',
-    contraseña: ''
+    contrasenia: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await userService.getAll();
-      setUsers(response.data);
-    } catch (err) {
-      console.error('Error al cargar usuarios:', err);
-      setError('Error al conectar con el servidor');
-    } finally {
-      setLoading(false);
+  // Validaciones HU001
+  const validateForm = (): string | null => {
+    if (!formData.apodo.trim()) {
+      return 'El apodo es obligatorio';
     }
+    
+    if (formData.apodo.length < 3) {
+      return 'El apodo debe tener al menos 3 caracteres';
+    }
+    
+    if (formData.apodo.length > 50) {
+      return 'El apodo no debe superar los 50 caracteres';
+    }
+    
+    if (!formData.correo.trim()) {
+      return 'El correo electrónico es obligatorio';
+    }
+    
+    if (formData.correo.length > 50) {
+      return 'El correo electrónico no debe superar los 50 caracteres';
+    }
+    
+    // Validación básica de formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.correo)) {
+      return 'Ingrese un correo electrónico válido';
+    }
+    
+    if (!formData.contrasenia) {
+      return 'La contraseña es obligatoria';
+    }
+    
+    if (formData.contrasenia.length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    
+    if (formData.contrasenia.length > 20) {
+      return 'La contraseña no debe superar los 20 caracteres';
+    }
+    
+    return null;
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
+    // Validar formulario
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
+      console.log('👤 Intentando crear usuario:', { 
+        apodo: formData.apodo, 
+        correo: formData.correo,
+        contrasenia: '***' 
+      });
       const response = await userService.create(formData);
+      console.log('✅ Usuario creado exitosamente:', response.data);
       onUserSelect(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear usuario');
+      console.error('❌ Error al crear usuario:', err.response?.data || err.message);
+      if (err.response?.status === 409) {
+        setError('El apodo o correo electrónico ya está registrado');
+      } else if (err.response?.data?.mensaje) {
+        setError(err.response.data.mensaje);
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Error al crear la cuenta. Intente nuevamente');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="retro-container max-w-2xl mx-auto text-center">
-        <div className="text-4xl mb-4 animate-pulse">⟳</div>
-        <p className="text-neon-green uppercase tracking-wider">Cargando sistema...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="retro-container mb-8">
-        <h2 className="retro-subtitle mb-6 text-center">
-          &gt; Seleccionar Usuario &lt;
-        </h2>
+    <div className="retro-container max-w-md mx-auto">
+      <h2 className="text-3xl font-bold text-neon-green text-center mb-2 crt-effect">
+        &gt; CREAR CUENTA &lt;
+      </h2>
 
+      <form onSubmit={handleCreateUser} className="space-y-4">
+        {/* Campo de Apodo */}
+        <div>
+          <label className="block text-neon-green mb-2 uppercase tracking-wider text-sm">
+            Apodo *
+          </label>
+          <input
+            type="text"
+            value={formData.apodo}
+            onChange={(e) => setFormData({ ...formData, apodo: e.target.value })}
+            className="retro-input w-full"
+            placeholder="tu_apodo"
+            maxLength={50}
+            disabled={loading}
+          />
+          <p className="text-neon-green/50 text-xs mt-1">
+            Entre 3 y 50 caracteres
+          </p>
+        </div>
+
+        {/* Campo de Correo Electrónico */}
+        <div>
+          <label className="block text-neon-green mb-2 uppercase tracking-wider text-sm">
+            Correo Electrónico *
+          </label>
+          <input
+            type="email"
+            value={formData.correo}
+            onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+            className="retro-input w-full"
+            placeholder="usuario@ejemplo.com"
+            maxLength={50}
+            disabled={loading}
+          />
+          <p className="text-neon-green/50 text-xs mt-1">
+            Máximo 50 caracteres
+          </p>
+        </div>
+
+        {/* Campo de Contraseña */}
+        <div>
+          <label className="block text-neon-green mb-2 uppercase tracking-wider text-sm">
+            Contraseña *
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={formData.contrasenia}
+              onChange={(e) => setFormData({ ...formData, contrasenia: e.target.value })}
+              className="retro-input w-full pr-12"
+              placeholder="••••••••"
+              minLength={6}
+              maxLength={20}
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neon-green hover:text-neon-green/70 transition-colors"
+              disabled={loading}
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </button>
+          </div>
+          <p className="text-neon-green/50 text-xs mt-1">
+            Entre 6 y 20 caracteres
+          </p>
+        </div>
+
+        {/* Mensaje de Error */}
         {error && (
-          <div className="bg-red-900/20 border-2 border-red-500 text-red-500 px-4 py-3 rounded mb-4">
-            <p className="font-bold">ERROR:</p>
-            <p>{error}</p>
+          <div className="bg-red-900/30 border-2 border-red-500 rounded p-3 text-red-500 text-sm">
+            <span className="font-bold">⚠️ ERROR:</span> {error}
           </div>
         )}
 
-        {!showCreateForm ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {users.length === 0 ? (
-                <div className="col-span-2 text-center py-8 text-neon-green/50">
-                  <p className="mb-4">[ No hay usuarios registrados ]</p>
-                </div>
-              ) : (
-                users.map((user) => (
-                  <button
-                    key={user.id}
-                    onClick={() => onUserSelect(user)}
-                    className="retro-card text-left hover:scale-105 transition-transform"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl font-bold text-neon-green crt-effect">
-                        @{user.apodo}
-                      </span>
-                      <span className="text-neon-green/50 text-sm">ID: {user.id.slice(0, 8)}</span>
-                    </div>
-                    <p className="text-neon-green/70 text-sm mb-2">{user.correo}</p>
-                    <div className="flex gap-4 text-xs">
-                      <span className="text-neon-green/60">
-                        ₿ {user.totalTransacciones} transacciones
-                      </span>
-                      <span className="text-neon-green/60">
-                        📁 {user.totalCategorias} categorías
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="retro-button"
-              >
-                + Crear Nuevo Usuario
-              </button>
-            </div>
-          </>
-        ) : (
-          <form onSubmit={handleCreateUser} className="space-y-4">
-            <div>
-              <label className="block text-neon-green mb-2 uppercase text-sm tracking-wider">
-                &gt; Apodo:
-              </label>
-              <input
-                type="text"
-                value={formData.apodo}
-                onChange={(e) => setFormData({ ...formData, apodo: e.target.value })}
-                className="retro-input w-full"
-                placeholder="tu_apodo"
-                required
-                minLength={3}
-              />
-            </div>
-
-            <div>
-              <label className="block text-neon-green mb-2 uppercase text-sm tracking-wider">
-                &gt; Correo:
-              </label>
-              <input
-                type="email"
-                value={formData.correo}
-                onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
-                className="retro-input w-full"
-                placeholder="email@ejemplo.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-neon-green mb-2 uppercase text-sm tracking-wider">
-                &gt; Contraseña:
-              </label>
-              <input
-                type="password"
-                value={formData.contraseña}
-                onChange={(e) => setFormData({ ...formData, contraseña: e.target.value })}
-                className="retro-input w-full"
-                placeholder="••••••"
-                required
-                minLength={6}
-              />
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <button type="submit" className="retro-button flex-1">
-                Crear Usuario
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateForm(false);
-                  setError('');
-                  setFormData({ apodo: '', correo: '', contraseña: '' });
-                }}
-                className="retro-button-danger flex-1"
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+        {/* Botón de Crear Cuenta */}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`retro-button w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {loading ? '⟳ Creando cuenta...' : '→ Crear Cuenta'}
+        </button>
+      </form>
     </div>
   );
 }

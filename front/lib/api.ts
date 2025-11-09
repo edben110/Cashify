@@ -13,13 +13,13 @@ const api = axios.create({
 
 export interface LoginRequest {
   correo: string;
-  contraseña: string;
+  contrasenia: string; // Backend usa "contrasenia" sin ñ
 }
 
 export interface UserRequest {
   apodo: string;
   correo: string;
-  contraseña: string;
+  contrasenia: string; // Backend usa "contrasenia" sin ñ
 }
 
 export interface UserResponse {

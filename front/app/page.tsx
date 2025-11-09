@@ -11,7 +11,7 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(true);
 
   return (
-    <main className="min-h-screen bg-retro-black">
+    <main className="min-h-screen bg-retro-black overflow-y-auto">
       {/* Header */}
       <header className="border-b-2 border-neon-green py-6 px-4">
         <div className="container mx-auto">
@@ -24,7 +24,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-24">
         {!selectedUser ? (
           showLogin ? (
             <Login 

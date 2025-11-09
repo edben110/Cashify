@@ -35,9 +35,9 @@ public class User {
     @Indexed(unique = true)
     private String correo;
     
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-    private String contraseña;
+    @NotBlank(message = "La contrasenia es obligatoria")
+    @Size(min = 6, message = "La contrasenia debe tener al menos 6 caracteres")
+    private String contrasenia;
     
     // Listas de IDs referenciadas (no embebidas para mejor escalabilidad)
     private List<String> transaccionesIds = new ArrayList<>();
@@ -46,10 +46,10 @@ public class User {
     /**
      * Constructor para crear un usuario sin ID (se generará automáticamente)
      */
-    public User(String apodo, String correo, String contraseña) {
+    public User(String apodo, String correo, String contrasenia) {
         this.apodo = apodo;
         this.correo = correo;
-        this.contraseña = contraseña;
+        this.contrasenia = contrasenia;
         this.transaccionesIds = new ArrayList<>();
         this.categoriasIds = new ArrayList<>();
     }

@@ -1,13 +1,98 @@
 'use client';
 
-import { ResumenGastos, TransaccionResponse } from '@/lib/api';
+import { useState, useEffect } from 'react';
+import { ResumenGastos, TransaccionResponse, transaccionService } from '@/lib/api';
 
 interface SummaryProps {
   resumen: ResumenGastos;
   transacciones: TransaccionResponse[];
+  userId: string;
 }
 
-export default function Summary({ resumen, transacciones }: SummaryProps) {
+export default function Summary({ resumen: resumenInicial, transacciones: transaccionesIniciales, userId }: SummaryProps) {
+  const [resumen, setResumen] = useState<ResumenGastos>(resumenInicial);
+  const [transacciones, setTransacciones] = useState<TransaccionResponse[]>(transaccionesIniciales);
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [filtroActivo, setFiltroActivo] = useState(false);
+
+  // Actualizar cuando cambien las props
+  useEffect(() => {
+    if (!filtroActivo) {
+      setResumen(resumenInicial);
+      setTransacciones(transaccionesIniciales);
+    }
+  }, [resumenInicial, transaccionesIniciales, filtroActivo]);
+
+  const aplicarFiltroPorFecha = async () => {
+    if (!fechaInicio || !fechaFin) {
+      setError('Debe seleccionar fecha de inicio y fin');
+      return;
+    }
+
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+
+    if (inicio > fin) {
+      setError('La fecha de inicio debe ser anterior a la fecha de fin');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Convertir a formato ISO con hora
+      const fechaInicioISO = `${fechaInicio}T00:00:00`;
+      const fechaFinISO = `${fechaFin}T23:59:59`;
+
+      // Obtener resumen y transacciones por periodo
+      const [resumenRes, transaccionesRes] = await Promise.all([
+        transaccionService.getResumenPorPeriodo(userId, fechaInicioISO, fechaFinISO),
+        transaccionService.getByFecha(userId, fechaInicioISO, fechaFinISO)
+      ]);
+
+      setResumen(resumenRes.data);
+      setTransacciones(transaccionesRes.data);
+      setFiltroActivo(true);
+    } catch (err) {
+      console.error('Error al aplicar filtro:', err);
+      setError('Error al cargar datos del periodo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const limpiarFiltro = () => {
+    setFechaInicio('');
+    setFechaFin('');
+    setError('');
+    setFiltroActivo(false);
+    setResumen(resumenInicial);
+    setTransacciones(transaccionesIniciales);
+  };
+
+  const aplicarFiltroRapido = (periodo: 'semana' | 'mes' | 'año') => {
+    const hoy = new Date();
+    let inicio = new Date();
+
+    switch (periodo) {
+      case 'semana':
+        inicio.setDate(hoy.getDate() - 7);
+        break;
+      case 'mes':
+        inicio.setMonth(hoy.getMonth() - 1);
+        break;
+      case 'año':
+        inicio.setFullYear(hoy.getFullYear() - 1);
+        break;
+    }
+
+    setFechaInicio(inicio.toISOString().split('T')[0]);
+    setFechaFin(hoy.toISOString().split('T')[0]);
+  };
   // Estadísticas por categoría
   const categoriaStats = transacciones.reduce((acc, trans) => {
     const catName = trans.categoriaNombre;
@@ -40,6 +125,95 @@ export default function Summary({ resumen, transacciones }: SummaryProps) {
 
   return (
     <div className="space-y-6">
+      {/* Filtros de Fecha */}
+      <div className="retro-container">
+        <h3 className="retro-subtitle mb-4">&gt; Filtrar por Periodo</h3>
+        
+        {/* Filtros Rápidos */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => aplicarFiltroRapido('semana')}
+            className="retro-button-small"
+            disabled={loading}
+          >
+            Última Semana
+          </button>
+          <button
+            onClick={() => aplicarFiltroRapido('mes')}
+            className="retro-button-small"
+            disabled={loading}
+          >
+            Último Mes
+          </button>
+          <button
+            onClick={() => aplicarFiltroRapido('año')}
+            className="retro-button-small"
+            disabled={loading}
+          >
+            Último Año
+          </button>
+        </div>
+
+        {/* Selector de Fechas Personalizado */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-neon-green/70 text-sm mb-2 uppercase tracking-wider">
+              Fecha Inicio
+            </label>
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="retro-input w-full"
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <label className="block text-neon-green/70 text-sm mb-2 uppercase tracking-wider">
+              Fecha Fin
+            </label>
+            <input
+              type="date"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="retro-input w-full"
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={aplicarFiltroPorFecha}
+            className="retro-button"
+            disabled={loading || !fechaInicio || !fechaFin}
+          >
+            {loading ? '⟳ Cargando...' : '🔍 Aplicar Filtro'}
+          </button>
+          {filtroActivo && (
+            <button
+              onClick={limpiarFiltro}
+              className="retro-button-danger"
+              disabled={loading}
+            >
+              ✕ Limpiar Filtro
+            </button>
+          )}
+        </div>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500 rounded text-red-500 text-sm">
+            ⚠ {error}
+          </div>
+        )}
+
+        {filtroActivo && (
+          <div className="mt-4 p-3 bg-neon-green/10 border border-neon-green rounded text-neon-green text-sm">
+            ✓ Mostrando datos del {new Date(fechaInicio).toLocaleDateString('es-ES')} al {new Date(fechaFin).toLocaleDateString('es-ES')}
+          </div>
+        )}
+      </div>
+
       {/* Resumen General */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="retro-card border-green-500 shadow-green-500/30">

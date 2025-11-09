@@ -28,7 +28,7 @@ public class UserController {
     
     private final UserService userService;
     
-    @Operation(summary = "Iniciar sesión", description = "Autentica un usuario con correo y contraseña (HU002)")
+    @Operation(summary = "Iniciar sesión", description = "Autentica un usuario con correo y contraseña")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Inicio de sesión exitoso"),
         @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),

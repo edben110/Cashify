@@ -42,10 +42,10 @@ class UserServiceTest {
         user = new User("testuser", "test@example.com", "password123");
         user.setId("1");
         
-        userRequestDTO = new UserRequestDTO();
-        userRequestDTO.setApodo("testuser");
-        userRequestDTO.setCorreo("test@example.com");
-        userRequestDTO.setContraseña("password123");
+    userRequestDTO = new UserRequestDTO();
+    userRequestDTO.setApodo("testuser");
+    userRequestDTO.setCorreo("test@example.com");
+    userRequestDTO.setContrasenia("password123");
     }
     
     @Test
@@ -142,10 +142,10 @@ class UserServiceTest {
         when(userRepository.existsByCorreo(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
         
-        UserRequestDTO updateDTO = new UserRequestDTO();
-        updateDTO.setApodo("updateduser");
-        updateDTO.setCorreo("updated@example.com");
-        updateDTO.setContraseña("newpass123");
+    UserRequestDTO updateDTO = new UserRequestDTO();
+    updateDTO.setApodo("updateduser");
+    updateDTO.setCorreo("updated@example.com");
+    updateDTO.setContrasenia("newpass123");
         
         // Act
         UserResponseDTO resultado = userService.actualizarUsuario("1", updateDTO);

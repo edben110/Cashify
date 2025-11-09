@@ -23,20 +23,20 @@ public class UserService {
     private final UserRepository userRepository;
     
     /**
-     * Autentica un usuario con correo y contraseña (HU002)
+     * Autentica un usuario con correo y contrasenia (HU002)
      * @param loginRequestDTO credenciales del usuario
      * @return usuario autenticado
      * @throws UnauthorizedException si las credenciales son incorrectas
      */
     public UserResponseDTO autenticarUsuario(LoginRequestDTO loginRequestDTO) {
         // Buscar usuario por correo
-        User user = userRepository.findByCorreo(loginRequestDTO.getCorreo())
-                .orElseThrow(() -> new UnauthorizedException("Correo electrónico o contraseña incorrectos"));
-        
-        // Verificar contraseña (en producción, usar BCrypt)
-        if (!user.getContraseña().equals(loginRequestDTO.getContraseña())) {
-            throw new UnauthorizedException("Correo electrónico o contraseña incorrectos");
-        }
+    User user = userRepository.findByCorreo(loginRequestDTO.getCorreo())
+        .orElseThrow(() -> new UnauthorizedException("Correo electrónico o contrasenia incorrectos"));
+
+    // Verificar contrasenia (en producción, usar BCrypt)
+    if (!user.getContrasenia().equals(loginRequestDTO.getContrasenia())) {
+        throw new UnauthorizedException("Correo electrónico o contrasenia incorrectos");
+    }
         
         return convertToDTO(user);
     }
@@ -60,11 +60,11 @@ public class UserService {
         }
         
         // Crear y guardar el usuario
-        User user = new User(
-                userRequestDTO.getApodo(),
-                userRequestDTO.getCorreo(),
-                userRequestDTO.getContraseña() // En producción, encriptar la contraseña
-        );
+    User user = new User(
+        userRequestDTO.getApodo(),
+        userRequestDTO.getCorreo(),
+        userRequestDTO.getContrasenia() // En producción, encriptar la contrasenia
+    );
         
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
@@ -129,8 +129,8 @@ public class UserService {
         // Actualizar campos
         user.setApodo(userRequestDTO.getApodo());
         user.setCorreo(userRequestDTO.getCorreo());
-        if (userRequestDTO.getContraseña() != null && !userRequestDTO.getContraseña().isEmpty()) {
-            user.setContraseña(userRequestDTO.getContraseña()); // En producción, encriptar
+        if (userRequestDTO.getContrasenia() != null && !userRequestDTO.getContrasenia().isEmpty()) {
+            user.setContrasenia(userRequestDTO.getContrasenia()); // En producción, encriptar
         }
         
         User updatedUser = userRepository.save(user);

@@ -101,7 +101,11 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       {/* Content */}
       <div>
         {activeTab === 'resumen' && resumen && (
-          <Summary resumen={resumen} transacciones={transacciones} />
+          <Summary 
+            resumen={resumen} 
+            transacciones={transacciones}
+            userId={user.id}
+          />
         )}
         
         {activeTab === 'transacciones' && (

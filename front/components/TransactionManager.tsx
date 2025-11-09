@@ -293,7 +293,6 @@ export default function TransactionManager({
                           minute: '2-digit'
                         })}
                       </span>
-                      <span>ID: {trans.id.slice(0, 8)}...</span>
                     </div>
                   </div>
 

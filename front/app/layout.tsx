@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="scanline">{children}</body>
+      <body className="scanline min-h-screen overflow-y-auto">{children}</body>
     </html>
   )
 }

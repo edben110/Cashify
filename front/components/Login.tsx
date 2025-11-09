@@ -10,7 +10,7 @@ interface LoginProps {
 
 export default function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps) {
   const [correo, setCorreo] = useState('');
-  const [contraseña, setContraseña] = useState('');
+  const [contrasenia, setContrasenia] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,15 +31,15 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps
       return 'Ingrese un correo electrónico válido';
     }
     
-    if (!contraseña) {
+    if (!contrasenia) {
       return 'La contraseña es obligatoria';
     }
     
-    if (contraseña.length < 8) {
+    if (contrasenia.length < 8) {
       return 'La contraseña debe tener al menos 8 caracteres';
     }
     
-    if (contraseña.length > 20) {
+    if (contrasenia.length > 20) {
       return 'La contraseña no debe superar los 20 caracteres';
     }
     
@@ -60,10 +60,13 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps
     setLoading(true);
     
     try {
-      const loginData: LoginRequest = { correo, contraseña };
+      const loginData: LoginRequest = { correo, contrasenia };
+      console.log('🔐 Intentando login con:', { correo, contrasenia: '***' });
       const response = await userService.login(loginData);
+      console.log('✅ Login exitoso:', response.data);
       onLoginSuccess(response.data);
     } catch (err: any) {
+      console.error('❌ Error en login:', err.response?.data || err.message);
       if (err.response?.status === 401) {
         setError('Correo electrónico o contraseña incorrectos');
       } else if (err.response?.data?.mensaje) {
@@ -81,9 +84,6 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps
       <h2 className="text-3xl font-bold text-neon-green text-center mb-2 crt-effect">
         &gt; INICIAR SESIÓN &lt;
       </h2>
-      <p className="text-center text-neon-green/60 mb-6 text-sm uppercase tracking-wider">
-        [ HU002 - Autenticación de Usuario ]
-      </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Campo de Correo Electrónico */}
@@ -113,8 +113,8 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }: LoginProps
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
+              value={contrasenia}
+              onChange={(e) => setContrasenia(e.target.value)}
               className="retro-input w-full pr-12"
               placeholder="••••••••"
               minLength={8}
